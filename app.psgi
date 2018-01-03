@@ -31,6 +31,6 @@ my $app = sub {
     my $buffer;
     $img->write( type => 'png', data => \$buffer );
 
-    return [ 200, [ 'Content-Type' => 'image/png' ], [$buffer] ];
+    return [ 200, [ 'Content-Type' => 'image/png', 'Content-Length' => length($buffer) ], [$buffer] ];
 };
 
