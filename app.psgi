@@ -12,23 +12,25 @@ my $app = sub {
     my $req = Plack::Request->new($env);
     my $img = Imager->new( xsize => 64, ysize => 64 );
 
-    my $n = 0;
+    my $n     = 0;
     my $email = $req->param('email') // '';
-    foreach my $val (unpack("C16", md5($email))) {
+    my $mask  = $req->param('mask') // '000000';
+    my ( $r, $g, $b ) = unpack 'C*', pack 'H*', $mask;
+    foreach my $val ( unpack( "C16", md5($email) ) ) {
         $img->box(
-            color  => Imager::Color->new( $val, $val, $val ),
-            xmin   => 16 * int( $n / 4 ),
-            ymin   => 16 * ( $n % 4 ),
-            xmax   => 16 * ( floor( $n / 4 ) + 1 ),
-            ymax   => 16 * ( ( $n % 4 ) + 1 ),
+            color => Imager::Color->new( $val ^ $r, $val ^ $g, $val ^ $b ),
+            xmin  => 16 * int( $n / 4 ),
+            ymin => 16 * ( $n % 4 ),
+            xmax => 16 * ( floor( $n / 4 ) + 1 ),
+            ymax => 16 * ( ( $n % 4 ) + 1 ),
             filled => 1,
         );
         $n++;
     }
 
     my $buffer;
-    $img->write(type=>'png', data => \$buffer);
+    $img->write( type => 'png', data => \$buffer );
 
-    return [200, ['Content-Type' => 'image/png'], [$buffer]];
+    return [ 200, [ 'Content-Type' => 'image/png' ], [$buffer] ];
 };
 
