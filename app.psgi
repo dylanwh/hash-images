@@ -14,11 +14,11 @@ my $app = sub {
 
     my $n     = 0;
     my $email = $req->param('email') // '';
-    my $mask  = $req->param('mask') // '000000';
+    my $mask  = $req->param('mask') // 'ffffff';
     my ( $r, $g, $b ) = unpack 'C*', pack 'H*', $mask;
     foreach my $val ( unpack( "C16", md5($email) ) ) {
         $img->box(
-            color => Imager::Color->new( $val ^ $r, $val ^ $g, $val ^ $b ),
+            color => Imager::Color->new( $val & $r, $val & $g, $val & $b ),
             xmin  => 16 * int( $n / 4 ),
             ymin => 16 * ( $n % 4 ),
             xmax => 16 * ( floor( $n / 4 ) + 1 ),
